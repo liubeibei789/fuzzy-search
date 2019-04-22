@@ -15,6 +15,11 @@ This is a second homework from my manager :) \
 Depending on your search approach, you may find that you’re getting different numbers of matches. 
 - My implementation leaves in newline characters – if you strip them out, you may find additional matches. 
 - My implementation also removes duplicate matches – for example, if searching for “hello” and my code found an approximate match for “helo” by deleting the third letter, it wouldn’t also flag the same “helo” as a match for the search term with the fourth letter deleted.
+
+## example:
+ if the pattern is coil:
+ foil differs by one substitution, coils by one insertion (insert one character into pattern), oil by one deletion, coli by one transposition.
+
 ### reference:
 - Sample Approximate Match Outputs:\
 Searching small.txt for “ware”:\
@@ -28,4 +33,6 @@ Searching small.txt for “ware”:\
 0 transpositions\
 22 substitutions: [0-1: he], [2-3: re], [6-7: re], [8-9: we], [10-11: re], [14-15: re], [16-17: he], [20-21: re], [22-23: te], [28-29: re], [30-31: de], [36-37: re], [37-38: ee], [41-42: re], [44-45: re], [47-48: re], [50-51: he], [53-54: se], [55-56: re], [57-58: se], [58-59: ee], [61-62: se]\
 0 insertions\
+
+a useful link: https://en.wikipedia.org/wiki/Approximate_string_matching
  

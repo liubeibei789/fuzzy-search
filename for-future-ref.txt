@@ -1,0 +1,13 @@
+1. how to allocate memory if you have to alloc it inside func:
+int readFile(char** buffer)
+{
+   *buffer = (char*)calloc(numBytes, sizeof(char));
+}
+
+int main()
+{
+   char *buffer;
+   readFile(&buffer);
+   printf("buffer:\n%s\n", buffer);
+   free(buffer);
+}
