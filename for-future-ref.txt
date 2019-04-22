@@ -11,3 +11,13 @@ int main()
    printf("buffer:\n%s\n", buffer);
    free(buffer);
 }
+
+2. switch case:case only accepts const int,variable invalid
+switch (minParent+1)
+{
+    case DP[i-1][j-1]: 
+       break;
+....
+...
+} 
+the above is invalid.
