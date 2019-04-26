@@ -28,12 +28,15 @@ int readFile(char** text)
  
    fread(*text, sizeof(char), numBytes, fp);
    fclose(fp);
-   //printf("text:\n%s\n", *text);
+   ////printf("text:\n%s\n", *text);
    printf("total:%ld bytes\n", numBytes);
    return 0;
 }
 
-#if 0
+//=====================================================
+// function: findExact
+// find the exact match
+//=====================================================
 int findExact(char *fileBuf, char *phrase)
 {
    char *ptr = strstr(fileBuf, phrase);
@@ -44,7 +47,6 @@ int findExact(char *fileBuf, char *phrase)
    
    return 0;
 }
-#endif
 
 //=====================================================
 // function: findMin
@@ -91,7 +93,8 @@ int** kAprroximateMatch(char* pattern, char* text, int m, int n)
    	DP[i][0] = i;
    }
 
-   // print before processing
+   ///////// TODO: move those two printings to fuction
+   // print DP matrix before processing
    printf("original DP matrix:\n");
    for (int i = 0; i < m+1; i++)
    {
@@ -102,45 +105,24 @@ int** kAprroximateMatch(char* pattern, char* text, int m, int n)
    	printf("\n");
    }
 
-   // fill the matrix
-
+   // fill the DP matrix
+   // first col:pattern, first row:text
    for (int j = 1; j < n+1; j++)
    {
    	for (int i = 1; i < m+1; i++)
    	{
-         if (pattern[i-1] == text[j-1])
+         if (pattern[i-1] == text[j-1]) //cur char match
          {
-            //printf("i=%d,pattern[i]=%c;j=%d,text[j]=%c\n",i-1,pattern[i-1],j-1,text[j-1]);
             DP[i][j] = findMin(DP[i-1][j-1], DP[i-1][j]+1, DP[i][j-1]+1);
-            //printf("111:%d=%d,%d,%d\n",DP[i][j],DP[i-1][j-1], DP[i-1][j]+1, DP[i][j-1]+1);
          }
-         else
+         else  // cur char differ
          {
          	DP[i][j] = findMin(DP[i-1][j-1]+1, DP[i-1][j]+1, DP[i][j-1]+1);
-            //printf("222:%d=%d,%d,%d\n",DP[i][j],DP[i-1][j-1]+1, DP[i-1][j]+1, DP[i][j-1]+1);
          }
-         //printf("pattern[i]=%c,text[j]=%c,DP[%d][%d]=%d\n", pattern[i],text[j],i,j,DP[i][j]);
-
    	}
-      /*
-   	if (DP[m][j] <= k)
-      {
-         int len = strlen(pattern);
-         printf("found...j=%d,", j);
-         printf("len=%d,", len);
-         
-         for(int p = len; p > 0; p--)
-         {
-            printf("%c,", text[j-p+1]);
-         }
-         printf("\n");
-         
-      	//return j;
-      }
-      */
    }
 
-   // print after filled
+   // print DP matrix after filled
    printf("edited DP matrix:\n");
    for (int i = 0; i < m+1; i++)
    {
@@ -166,91 +148,134 @@ void printing(char* text, int start, int end)
    for (int i = start; i <= end; i++)
    {
       printf("%c,", *ptr);
+      ptr = ptr + 1;
    }
    printf("\n");
 }
+
 
 //=====================================================
 // function: backtracking
 // find out the route to reach the "succeed point"
 // "succeed point":element less or equal than K
+// return length of moves
 //=====================================================
 
-#if 0
-int backtracking(char* text, int** DP, int m, int n, int k)
+int backtracking(int** DP, Move* moves, int j, int m, int n, int k)
 {
-   printf("enter backtracking\n");
+   
+   int step = 0;  //can not know total num of step ahead, so record reversely only
+   int i = m;
+
+   while(i > 0 && j > 0) //last(first before reverse) step reaches border(first col or first row)
+   {
+      // case 1: DP[i][j] came diagonally, cur char match
+      if (DP[i][j] == DP[i-1][j-1]) 
+      {
+         printf("-------- diagonal same -------\n");
+         printf("the %d-th character of pattern matched\n", i);
+         printf("i=%d,j=%d,DP[i][j]=%d,DP[i-1][j-1]=%d,\n", i,j,DP[i][j],DP[i-1][j-1]);
+         moves[step++] = diag_same;
+         i--; j--;
+      }
+      else
+      {
+         int minParent = findMin(DP[i-1][j-1], DP[i][j-1], DP[i-1][j]);
+         int diffPos;
+         
+         ////printf("minParent+1=%d, DP[i-1][j-1]=%d\n", minParent+1, DP[i-1][j-1]);
+
+         // case 2: DP[i][j] came diagonally, cur char differ
+         if (minParent == DP[i-1][j-1]) // diagonal, cur char mismatched --> substitution
+         {
+            printf("-------- diagonal diff -------\n");
+            printf("i=%d,j=%d,DP[i][j]=%d,DP[i-1][j-1]=%d,\n", i,j,DP[i][j],DP[i-1][j-1]);
+            moves[step++] = diag_diff;
+            i--; j--;
+         } 
+
+         // case 3: DP[i][j] came horizontally, text has one extra char --> pattern insertion will match
+         else if (minParent == DP[i][j-1])
+         {
+            printf("-------- horizontal --------\n");
+            printf("i=%d,j=%d,DP[i][j]=%d,DP[i][j-1]=%d,\n", i,j,DP[i][j],DP[i][j-1]);
+            moves[step++] = hori;
+            j--;
+         }
+
+         // case 4: DP[i][j] came vertically, pattern has one more char --> pattern deletion will match 
+         else if (minParent == DP[i-1][j])
+         {
+            printf("-------- vertical --------\n");
+            printf("i=%d,j=%d,DP[i][j]=%d,DP[i-1][j]=%d,\n", i,j,DP[i][j],DP[i-1][j]);
+            moves[step++] = vert;
+            i--;
+         } 
+         else
+         {
+            printf("route calculation error\n");
+         }
+         
+      }   
+   }
+   printf("end of backtracking....\n");
+   return step; //length of moves
+}
+
+//=====================================================
+// function: analyzeDP
+// find out the "succeed point"
+// "succeed point":element less or equal than K
+//=====================================================
+int analyzeDP(char* text, int** DP, int m, int n, int k)
+{
+   printf("enter analyzeDP\n");
    if (DP == NULL)
    {
       printf("DP NULL");
       return -1;
    }
-
-   Move moves[m+n+1]; //keep record of moves.max num of steps:m+n+1
-   int step = 0;  //can not know total num of step ahead, so record reversely only
-
-   // examine the last row for values less or equal to K
+  
+   // examine the last row for values less or equal to K, mark as "succeed point"
    for (int j = 0; j < n+1; j++)
    {
       if (DP[m][j] <= k)
       {
-         printf("found...idx=%d\n", j);
-         int jOriginal = j;
-         int i = m;
-         while(i >= 0 && j >= 0) //last(first before reverse) step reaches border
-         {
-            if (DP[i][j] == DP[i-1][j-1]) //DP[m][j] came diagonally, cur char matched
-            {
-               printf("the %d-th character of pattern matched", i);
-               moves[step++] = diag_same;
-            }
-            else
-            {
-               int minParent = findMin(DP[i-1][j-1],DP[i][j-1],DP[i-1][j]);
-               int diffPos;
-               
-               if (minParent+1 == DP[i-1][j-1]) // diagonal, cur char mismatched --> substitution
-               {
-                  moves[step++] = diag_diff;
-                  if (1 == k)
-                  {
-                     diffPos = j;
-                     printing(text, diffPos, jOriginal);
-                  }
-               } 
-               else if (minParent+1 == DP[i][j-1])  // horizontal --> insertion
-               {
-                  moves[step++] = hori;
-                  if (1 == k)
-                  {
-                     diffPos = j;
-                     printing(text, diffPos, jOriginal);
-                  }
-               }
-               else if (minParent+1 == DP[i-1][j]) // vertical --> deletion
-               {
-                  moves[step++] = vert;
-                  if (1 == k)
-                  {
-                     diffPos = j+1;
-                     printing(text, diffPos, jOriginal);
-                  }
-               } 
-               else
-               {
-                  printf("route calculation error\n");
-               }
-               
-            }
+         printf("#################################################\n");
+         printf("a fuzzy match with k=%d tolerance found...at text idx=%d\n", K, j);
+         Move *moves = calloc(m+n+1, sizeof(Move)); //keep record of moves.max num of steps:m+n+1
+         int numSteps = backtracking(DP, moves, j, m, n, k); // find out the route to reach the "succeed point"
+         printf("moves-len:%d,moves:", numSteps);
 
+         for (int i = numSteps; i >= 0; i--)
+         {
+            switch(moves[i])
+            {
+               case 0:
+                  printf("diag_same,");
+                  break;
+               case 1:
+                  printf("diag_diff,");
+                  break;
+               case 2:
+                  printf("hori,");
+                  break;
+               case 3:
+                  printf("vert,");
+                  break;
+               default:
+                  break;
+            }
+            
          }
+         printf("\n");
+
+         printing(text, j-numSteps+1, j);
       }
    }
-
-
    return 0;
+
 }
-#endif
 
 int main()
 {
@@ -265,7 +290,7 @@ int main()
    int numCol = strlen(text);
 
    DP = kAprroximateMatch(pattern, text, numRow, numCol);
-   //backtracking(text, DP, numRow, numCol, K);
+   analyzeDP(text, DP, numRow, numCol, K);
 
    free(text);
 }
