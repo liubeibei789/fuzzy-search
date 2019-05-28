@@ -37,14 +37,32 @@ int readFile(char** text)
 // function: findExact
 // find the exact match
 //=====================================================
-int findExact(char *fileBuf, char *phrase)
+int findExact(char *text, char *pattern, int lenText, int lenPattern, int offset)
 {
-   char *ptr = strstr(fileBuf, phrase);
-   if (ptr)
+   int found = 0;
+   int lastPos = 0;
+   while(text)
    {
-   	printf("an exact match found at index:%lu\n", ptr-fileBuf);
+   	char *ptr = strstr(text, pattern);
+	   if (ptr)
+	   {
+	   	found = 1;
+	   	//printf("a match found at index:%lu\n", ptr-text+lastPos);
+	   	printf("[%lu-%lu]:%s,", ptr-text+lastPos, ptr-text+lenPattern-offset+lastPos, pattern);
+	   }  
+	   lastPos += ptr-text+1;
+	   if(ptr)
+	   {
+         text = ptr + 1;
+	   }
+	   else
+	   {
+	   	//printf("no match found...\n");
+	   	break;
+	   }
+
    }
-   
+
    return 0;
 }
 
@@ -62,6 +80,7 @@ int findMin(int a, int b, int c)
    return 0;
 }
 
+#if 0
 //=====================================================
 // function: kAprroximateMatch
 // fuzzy searching "pattern" in "text", 
@@ -135,6 +154,7 @@ int** kAprroximateMatch(char* pattern, char* text, int m, int n)
 
    return DP;
 }
+#endif
 
 //=====================================================
 // function: printing
@@ -153,7 +173,7 @@ void printing(char* text, int start, int end)
    printf("\n");
 }
 
-
+#if 0
 //=====================================================
 // function: backtracking
 // find out the route to reach the "succeed point"
@@ -276,6 +296,125 @@ int analyzeDP(char* text, int** DP, int m, int n, int k)
    return 0;
 
 }
+#endif
+
+#if 1
+//=====================================================
+// function: getDeletion
+//=====================================================
+int getDeletion(char *pattern, int lenPattern, char *text, int lenText)
+{
+   printf("deletion:");
+   int offset = 2;
+   char *deleted = calloc(lenPattern-1, sizeof(char));
+   for(int i = 0; i < lenPattern; i++)
+   {
+   	for (int j = 0; j < i; j++)
+   	{
+   		deleted[j] = pattern[j];
+   	}
+   	for (int j = i+1; j < lenPattern; j++)
+   	{
+   		deleted[j-1] = pattern[j];
+   	}
+   	//printf("deleted:%s\n", deleted);
+   	findExact(text, deleted, lenText, lenPattern, offset);
+   }
+   printf("\n");
+	return 0;
+}
+#endif
+
+#if 1
+//=====================================================
+// function: getTransposition
+//=====================================================
+int getTransposition(char *pattern, int lenPattern, char *text, int lenText)
+{
+	printf("transposition:");
+	int offset = 1;
+	char *transposed = calloc(lenPattern, sizeof(char));
+   for(int i = 0; i < lenPattern; i++)
+   {
+      for (int j = 0; j < lenPattern; j++)
+	   {
+	   	strcpy(transposed, pattern);
+	   	char tmp = transposed[j];
+	   	transposed[j] = transposed[i];
+	   	transposed[i] = tmp;
+	   	//printf("transposed:%s\n", transposed);
+	   	findExact(text, transposed, lenText, lenPattern, offset);
+	   }
+   	
+   }
+   printf("\n");
+	return 0;
+}
+#endif
+
+#if 1
+//=====================================================
+// function: getSubstitution
+//=====================================================
+int getSubstitution(char *pattern, int lenPattern, char *text, int lenText)
+{
+   printf("substitution:");
+   int offset = 1;
+   char *substituted = calloc(lenPattern, sizeof(char));
+   for(int i = 0; i < lenPattern; i++)
+   {
+   	for (int k = 0; k < 26; k++)
+   	{
+         for (int j = 0; j < i; j++)
+	   	{
+	   		substituted[j] = pattern[j];
+	   	}
+	   	substituted[i] = 'a' + k;
+	   	for (int j = i+1; j < lenPattern; j++)
+	   	{
+	   		substituted[j] = pattern[j];
+	   	}
+	   	//printf("substituted:%s\n", substituted);
+	   	findExact(text, substituted, lenText, lenPattern, offset);
+   	}
+   	
+   }
+   printf("\n");
+	return 0;
+}
+#endif
+
+#if 1
+//=====================================================
+// function: getInsertion
+//=====================================================
+int getInsertion(char *pattern, int lenPattern, char *text, int lenText)
+{
+   printf("insertion:");
+   int offset = 0;
+   char *inserted = calloc(lenPattern, sizeof(char));
+   for(int i = 0; i < lenPattern+1; i++)
+   {
+   	for (int k = 0; k < 26; k++)
+   	{
+         for (int j = 0; j < i; j++)
+	   	{
+	   		inserted[j] = pattern[j];
+	   	}
+	   	inserted[i] = 'a' + k;
+	   	for (int j = i+1; j < lenPattern+1; j++)
+	   	{
+	   		inserted[j] = pattern[j-1];
+	   	}
+	   	//printf("inserted:%s\n", inserted);
+	   	findExact(text, inserted, lenText, lenPattern, offset);
+   	}
+   	
+   }
+   printf("\n");
+	return 0;
+}
+#endif
 
 int main()
 {
@@ -289,8 +428,15 @@ int main()
    int numRow = strlen(pattern);
    int numCol = strlen(text);
 
-   DP = kAprroximateMatch(pattern, text, numRow, numCol);
-   analyzeDP(text, DP, numRow, numCol, K);
+   //DP = kAprroximateMatch(pattern, text, numRow, numCol);
+   //analyzeDP(text, DP, numRow, numCol, K);
+
+   getDeletion(pattern, numRow, text, numCol);
+   getTransposition(pattern, numRow, text, numCol);
+   getSubstitution(pattern, numRow, text, numCol);
+   getInsertion(pattern, numRow, text, numCol);
+
+
 
    free(text);
 }
