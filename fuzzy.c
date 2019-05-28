@@ -6,12 +6,15 @@
 
 #define K 1  //k Aprroximate Match(k diffs tolerated)
 
-int readFile(char** text)
+//=====================================================
+// function: readFile
+//=====================================================
+int readFile(char *dir, char** text)
 {
    FILE    *fp;
    long    numBytes;
  
-   fp = fopen("./small.txt", "r");
+   fp = fopen(dir, "r");
    if(fp == NULL)
       return 1;
 
@@ -22,7 +25,7 @@ int readFile(char** text)
    // reset the file position indicator to the beginning of the file
    fseek(fp, 0L, SEEK_SET);
 
-   *text = (char*)calloc(numBytes, sizeof(char));	
+   *text = (char*)calloc(numBytes, sizeof(char));  
    if(*text == NULL)
       return 1;
  
@@ -32,6 +35,7 @@ int readFile(char** text)
    printf("total:%ld bytes\n", numBytes);
    return 0;
 }
+
 
 //=====================================================
 // function: findExact
@@ -43,23 +47,23 @@ int findExact(char *text, char *pattern, int lenText, int lenPattern, int offset
    int lastPos = 0;
    while(text)
    {
-   	char *ptr = strstr(text, pattern);
-	   if (ptr)
-	   {
-	   	found = 1;
-	   	//printf("a match found at index:%lu\n", ptr-text+lastPos);
-	   	printf("[%lu-%lu]:%s,", ptr-text+lastPos, ptr-text+lenPattern-offset+lastPos, pattern);
-	   }  
-	   lastPos += ptr-text+1;
-	   if(ptr)
-	   {
+      char *ptr = strstr(text, pattern);
+      if (ptr)
+      {
+         found = 1;
+         //printf("a match found at index:%lu\n", ptr-text+lastPos);
+         printf("[%lu-%lu]:%s,", ptr-text+lastPos, ptr-text+lenPattern-offset+lastPos, pattern);
+      }  
+      lastPos += ptr-text+1;
+      if(ptr)
+      {
          text = ptr + 1;
-	   }
-	   else
-	   {
-	   	//printf("no match found...\n");
-	   	break;
-	   }
+      }
+      else
+      {
+         //printf("no match found...\n");
+         break;
+      }
 
    }
 
@@ -91,25 +95,25 @@ int findMin(int a, int b, int c)
 
 int** kAprroximateMatch(char* pattern, char* text, int m, int n)
 {
-	printf("enter kAprroximateMatch\n");
+   printf("enter kAprroximateMatch\n");
    printf("looking for %s\n", pattern);
 
-	// DP matrix memory allocation 
-	int** DP = calloc(m+1, sizeof(int*));
+   // DP matrix memory allocation 
+   int** DP = calloc(m+1, sizeof(int*));
    for (int i = 0; i < m+1; i++)
    {
-   	DP[i] = calloc(n+1, sizeof(int));
+      DP[i] = calloc(n+1, sizeof(int));
    }
    
    // pattern is empty, 0 difference with text t1...tj
    for (int j = 0; j < n+1; j++)
    {
-   	DP[0][j] = 0;
+      DP[0][j] = 0;
    }
    // pattern p1...pi, i difference with empty text
    for (int i = 0; i < m+1; i++)
    {
-   	DP[i][0] = i;
+      DP[i][0] = i;
    }
 
    ///////// TODO: move those two printings to fuction
@@ -117,28 +121,28 @@ int** kAprroximateMatch(char* pattern, char* text, int m, int n)
    printf("original DP matrix:\n");
    for (int i = 0; i < m+1; i++)
    {
-   	for (int j = 0; j < n+1; j++)
-   	{
-   		printf("%d,",DP[i][j]);
-   	}
-   	printf("\n");
+      for (int j = 0; j < n+1; j++)
+      {
+         printf("%d,",DP[i][j]);
+      }
+      printf("\n");
    }
 
    // fill the DP matrix
    // first col:pattern, first row:text
    for (int j = 1; j < n+1; j++)
    {
-   	for (int i = 1; i < m+1; i++)
-   	{
+      for (int i = 1; i < m+1; i++)
+      {
          if (pattern[i-1] == text[j-1]) //cur char match
          {
             DP[i][j] = findMin(DP[i-1][j-1], DP[i-1][j]+1, DP[i][j-1]+1);
          }
          else  // cur char differ
          {
-         	DP[i][j] = findMin(DP[i-1][j-1]+1, DP[i-1][j]+1, DP[i][j-1]+1);
+            DP[i][j] = findMin(DP[i-1][j-1]+1, DP[i-1][j]+1, DP[i][j-1]+1);
          }
-   	}
+      }
    }
 
    // print DP matrix after filled
@@ -309,19 +313,19 @@ int getDeletion(char *pattern, int lenPattern, char *text, int lenText)
    char *deleted = calloc(lenPattern-1, sizeof(char));
    for(int i = 0; i < lenPattern; i++)
    {
-   	for (int j = 0; j < i; j++)
-   	{
-   		deleted[j] = pattern[j];
-   	}
-   	for (int j = i+1; j < lenPattern; j++)
-   	{
-   		deleted[j-1] = pattern[j];
-   	}
-   	//printf("deleted:%s\n", deleted);
-   	findExact(text, deleted, lenText, lenPattern, offset);
+      for (int j = 0; j < i; j++)
+      {
+         deleted[j] = pattern[j];
+      }
+      for (int j = i+1; j < lenPattern; j++)
+      {
+         deleted[j-1] = pattern[j];
+      }
+      //printf("deleted:%s\n", deleted);
+      findExact(text, deleted, lenText, lenPattern, offset);
    }
    printf("\n");
-	return 0;
+   return 0;
 }
 #endif
 
@@ -331,24 +335,24 @@ int getDeletion(char *pattern, int lenPattern, char *text, int lenText)
 //=====================================================
 int getTransposition(char *pattern, int lenPattern, char *text, int lenText)
 {
-	printf("transposition:");
-	int offset = 1;
-	char *transposed = calloc(lenPattern, sizeof(char));
+   printf("transposition:");
+   int offset = 1;
+   char *transposed = calloc(lenPattern, sizeof(char));
    for(int i = 0; i < lenPattern; i++)
    {
       for (int j = 0; j < lenPattern; j++)
-	   {
-	   	strcpy(transposed, pattern);
-	   	char tmp = transposed[j];
-	   	transposed[j] = transposed[i];
-	   	transposed[i] = tmp;
-	   	//printf("transposed:%s\n", transposed);
-	   	findExact(text, transposed, lenText, lenPattern, offset);
-	   }
-   	
+      {
+         strcpy(transposed, pattern);
+         char tmp = transposed[j];
+         transposed[j] = transposed[i];
+         transposed[i] = tmp;
+         //printf("transposed:%s\n", transposed);
+         findExact(text, transposed, lenText, lenPattern, offset);
+      }
+      
    }
    printf("\n");
-	return 0;
+   return 0;
 }
 #endif
 
@@ -363,24 +367,24 @@ int getSubstitution(char *pattern, int lenPattern, char *text, int lenText)
    char *substituted = calloc(lenPattern, sizeof(char));
    for(int i = 0; i < lenPattern; i++)
    {
-   	for (int k = 0; k < 26; k++)
-   	{
+      for (int k = 0; k < 26; k++)
+      {
          for (int j = 0; j < i; j++)
-	   	{
-	   		substituted[j] = pattern[j];
-	   	}
-	   	substituted[i] = 'a' + k;
-	   	for (int j = i+1; j < lenPattern; j++)
-	   	{
-	   		substituted[j] = pattern[j];
-	   	}
-	   	//printf("substituted:%s\n", substituted);
-	   	findExact(text, substituted, lenText, lenPattern, offset);
-   	}
-   	
+         {
+            substituted[j] = pattern[j];
+         }
+         substituted[i] = 'a' + k;
+         for (int j = i+1; j < lenPattern; j++)
+         {
+            substituted[j] = pattern[j];
+         }
+         //printf("substituted:%s\n", substituted);
+         findExact(text, substituted, lenText, lenPattern, offset);
+      }
+      
    }
    printf("\n");
-	return 0;
+   return 0;
 }
 #endif
 
@@ -395,36 +399,52 @@ int getInsertion(char *pattern, int lenPattern, char *text, int lenText)
    char *inserted = calloc(lenPattern, sizeof(char));
    for(int i = 0; i < lenPattern+1; i++)
    {
-   	for (int k = 0; k < 26; k++)
-   	{
+      for (int k = 0; k < 26; k++)
+      {
          for (int j = 0; j < i; j++)
-	   	{
-	   		inserted[j] = pattern[j];
-	   	}
-	   	inserted[i] = 'a' + k;
-	   	for (int j = i+1; j < lenPattern+1; j++)
-	   	{
-	   		inserted[j] = pattern[j-1];
-	   	}
-	   	//printf("inserted:%s\n", inserted);
-	   	findExact(text, inserted, lenText, lenPattern, offset);
-   	}
-   	
+         {
+            inserted[j] = pattern[j];
+         }
+         inserted[i] = 'a' + k;
+         for (int j = i+1; j < lenPattern+1; j++)
+         {
+            inserted[j] = pattern[j-1];
+         }
+         //printf("inserted:%s\n", inserted);
+         findExact(text, inserted, lenText, lenPattern, offset);
+      }
+      
    }
    printf("\n");
-	return 0;
+   return 0;
 }
 #endif
 
-int main()
+//=====================================================
+// function: readDict
+//=====================================================
+int readDict(char **dict)
 {
+   int i = 0;
+   FILE * fp;
+   char * pattern = calloc(30, sizeof(char));
    char *text;
-   int **DP;
-   readFile(&text); //attention!!DO NOT pass "text"!remember &
-   char *pattern = "ware";
-   printf("text:\n%s\n", text);
-   ////findExact(text, pattern);
+   size_t len = 0;
+   ssize_t read;
+   fp = fopen("./dictionary.txt", "r");
+   if (fp == NULL)
+   {
+      exit(EXIT_FAILURE);
+   }
 
+   readFile("./small.txt", &text); //attention!!DO NOT pass "text"!remember &
+   printf("text:\n%s\n", text);
+
+//======================================================
+// please enable the following block to test "ware" case
+//======================================================
+   #if 1
+   pattern = "ware";
    int numRow = strlen(pattern);
    int numCol = strlen(text);
 
@@ -435,10 +455,54 @@ int main()
    getTransposition(pattern, numRow, text, numCol);
    getSubstitution(pattern, numRow, text, numCol);
    getInsertion(pattern, numRow, text, numCol);
+   #endif
+//======================================================
+
+
+//======================================================
+// please enable the following block to test dictionary case
+//======================================================
+   #if 0
+   while ((read = getline(&pattern, &len, fp)) != -1)
+   {
+      printf("%s", pattern);
+
+      int numRow = strlen(pattern);
+      int numCol = strlen(text);
+
+      //DP = kAprroximateMatch(pattern, text, numRow, numCol);
+      //analyzeDP(text, DP, numRow, numCol, K);
+
+      getDeletion(pattern, numRow, text, numCol);
+      getTransposition(pattern, numRow, text, numCol);
+      getSubstitution(pattern, numRow, text, numCol);
+      getInsertion(pattern, numRow, text, numCol);
+   }
+   #endif
+//======================================================
+
+   return 0;
+}
 
 
 
-   free(text);
+
+//=====================================================
+// main function
+//=====================================================
+
+int main()
+{
+   
+   char **dict;
+   int **DP;
+   char *pattern;
+   
+   int num = readDict(dict);
+   //printf("num=%d\n",num);
+   
+
+   //free(text);
 }
 
 

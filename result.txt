@@ -1,0 +1,10 @@
+[beliu: ~/Desktop/fuzzy-search]$gcc fuzzy.c
+[beliu: ~/Desktop/fuzzy-search]$./a.out 
+total:68 bytes
+text:
+hereharewereworeherareteartoredeardareearrearehrerheasereseersearrah
+deletion:[5-7]:are,[19-21]:are,[35-37]:are,[43-45]:are,
+transposition:
+substitution:[34-37]:dare,[42-45]:eare,[4-7]:hare,[18-21]:rare,[8-11]:were,[12-15]:wore,
+insertion:
+[beliu: ~/Desktop/fuzzy-search]$
