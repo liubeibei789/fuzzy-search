@@ -1,0 +1,6 @@
+how-to-run
+
+1.go to root directory
+2.gcc fuzzy.c
+3.case 1: example --> result will land in result_example.txt
+  case 2: dictionary --> result will land in result_dict.txt

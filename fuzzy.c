@@ -84,7 +84,7 @@ int findMin(int a, int b, int c)
    return 0;
 }
 
-#if 0
+#if 1
 //=====================================================
 // function: kAprroximateMatch
 // fuzzy searching "pattern" in "text", 
@@ -177,7 +177,7 @@ void printing(char* text, int start, int end)
    printf("\n");
 }
 
-#if 0
+#if 1
 //=====================================================
 // function: backtracking
 // find out the route to reach the "succeed point"
@@ -485,8 +485,6 @@ int readDict(char **dict)
 }
 
 
-
-
 //=====================================================
 // main function
 //=====================================================
@@ -498,8 +496,7 @@ int main()
    int **DP;
    char *pattern;
    
-   int num = readDict(dict);
-   //printf("num=%d\n",num);
+   readDict(dict);
    
 
    //free(text);
